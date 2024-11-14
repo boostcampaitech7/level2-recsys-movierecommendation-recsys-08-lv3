@@ -247,7 +247,6 @@ Temporary Items
 
 # ETC
 data
-analysis
 weights
 *.jpg
 data.tar.gz
@@ -256,3 +255,4 @@ data.tar.gz
 *.html
 mlruns
 mlartifacts
+baseline_code
