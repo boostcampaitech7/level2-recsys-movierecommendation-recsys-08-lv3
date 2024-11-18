@@ -55,18 +55,43 @@ def create_unique_person_id(data: pd.DataFrame) -> LabelEncoder:
     person_encoder.fit(unique_persons)
     return person_encoder
 
-def encode_writer_director(data: pd.DataFrame, person_encoder: LabelEncoder) -> pd.DataFrame:
+def encode_writer_director(ratings_merged: pd.DataFrame, person_encoder: LabelEncoder) -> pd.DataFrame:
     """
     writer와 director 열을 레이블 인코딩합니다.
-    """
-    data['writer_encoded'] = person_encoder.transform(data['writer'])
-    data['director_encoded'] = person_encoder.transform(data['director'])
-    return data
 
-def encode_genre(data: pd.DataFrame) -> pd.DataFrame:
+    Args:
+        ratings_merged (pd.DataFrame): 데이터프레임 (writer, director 열 포함).
+        person_encoder (LabelEncoder): 작가와 감독에 대한 공통 ID 인코더.
+
+    Returns:
+        pd.DataFrame: writer와 director가 인코딩된 데이터프레임.
+    """
+
+    # writer와 director 각각 인코딩
+    ratings_merged['writer_encoded'] = person_encoder.transform(ratings_merged['writer'])
+    ratings_merged['director_encoded'] = person_encoder.transform(ratings_merged['director'])
+    
+    # 기존 컬럼 드랍 & 리네임
+    ratings_merged = ratings_merged.drop(['writer', 'director'], axis=1)
+    ratings_merged.rename(columns={'writer_encoded': 'writer'}, inplace=True)
+    ratings_merged.rename(columns={'director_encoded': 'director'}, inplace=True)
+    return ratings_merged
+
+
+def encode_genre(ratings_merged: pd.DataFrame) -> pd.DataFrame:
     """
     장르(genre) 열을 레이블 인코딩합니다.
+
+    Args:
+        ratings_merged (pd.DataFrame): 데이터프레임 (genre 열 포함).
+
+    Returns:
+        pd.DataFrame: genre가 인코딩된 데이터프레임.
     """
+    # 장르 인코딩
     genre_encoder = LabelEncoder()
-    data['genre_encoded'] = genre_encoder.fit_transform(data['genre'])
-    return data
+    ratings_merged['genre_encoded'] = genre_encoder.fit_transform(ratings_merged['genre'])
+    # 기존 컬럼 드랍 & 리네임
+    ratings_merged = ratings_merged.drop(['genre'], axis=1)
+    ratings_merged.rename(columns={'genre_encoded': 'genre'}, inplace=True)
+    return ratings_merged
