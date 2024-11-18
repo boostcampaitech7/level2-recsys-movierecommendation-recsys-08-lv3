@@ -1,5 +1,7 @@
 import os
 from typing import Tuple
+import pandas as pd
+
 
 def load_data(data_path: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 	"""
