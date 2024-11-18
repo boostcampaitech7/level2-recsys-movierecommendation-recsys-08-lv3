@@ -1,5 +1,6 @@
 import pandas as pd
-from data_loader import load_data
+
+from .data_loader import load_data
 
 
 def data_merge(data_path: str) -> pd.DataFrame:
@@ -20,6 +21,8 @@ def data_merge(data_path: str) -> pd.DataFrame:
     merged_data = pd.merge(merged_data, director, on="item", how="left")
     merged_data = pd.merge(merged_data, genre, on="item", how="left")
     merged_data = pd.merge(merged_data, writer, on="item", how="left")
+
+    merged_data = fill_missing_years(merged_data)
 
     return merged_data
 
