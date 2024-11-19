@@ -1,14 +1,5 @@
 import argparse
-def train_valid_split():
-    data={}
-    negativesampling
-    data['train_data']=pd.DataFrame
-    data['valid_data']=pd.DataFrame
-return data
 
-def train(args,data):
-    
-    fdsfa
 def main():
 
     data= train_valid_split():
@@ -26,7 +17,7 @@ if __name__ == "__main__":
     arg('--datapath',type=str,
         help='datapath를 지정하시오')
     arg('--model', '-m', '--m', type=str, 
-        choices=['catboost', 'DeepFM'],
+        choices=['catboost', 'DeepFM','MF','NeuralMF'],
         help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--seed','-s','--s',type=int,
         help= '시드설정')
