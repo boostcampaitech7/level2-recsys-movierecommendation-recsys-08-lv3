@@ -46,52 +46,25 @@ def fill_missing_years_parallel(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 # 레이블 인코딩
-def create_unique_person_id(data: pd.DataFrame) -> LabelEncoder:
+def label_encode_columns(df, columns):
     """
-    작가(writer)와 감독(director) 정보를 결합하여 고유 ID 공간을 생성하고 레이블 인코딩합니다.
-    """
-    unique_persons = pd.concat([data['writer'], data['director']]).drop_duplicates()
-    person_encoder = LabelEncoder()
-    person_encoder.fit(unique_persons)
-    return person_encoder
-
-def encode_writer_director(ratings_merged: pd.DataFrame, person_encoder: LabelEncoder) -> pd.DataFrame:
-    """
-    writer와 director 열을 레이블 인코딩합니다.
+    데이터 레이블링 함수: 지정된 열에서 고유값을 정수로 매핑하여 데이터프레임의 값을 변환합니다.
 
     Args:
-        ratings_merged (pd.DataFrame): 데이터프레임 (writer, director 열 포함).
-        person_encoder (LabelEncoder): 작가와 감독에 대한 공통 ID 인코더.
+        df (pd.DataFrame): 레이블링을 적용할 데이터프레임.
+        columns (list): 레이블링을 적용할 열 이름의 리스트.
 
     Returns:
-        pd.DataFrame: writer와 director가 인코딩된 데이터프레임.
+        pd.DataFrame: 지정된 열들이 레이블링된 새로운 데이터프레임.
     """
-
-    # writer와 director 각각 인코딩
-    ratings_merged['writer_encoded'] = person_encoder.transform(ratings_merged['writer'])
-    ratings_merged['director_encoded'] = person_encoder.transform(ratings_merged['director'])
+    for col in columns:
+        # 문자열로 변환하여 정렬 (숫자와 문자열 혼합 처리)
+        df[col] = df[col].astype(str)
+        unique_values = sorted(set(df[col]))  # 고유값 정렬
+        mapping_dict = {unique_values[i]: i for i in range(len(unique_values))}
+        df[col] = df[col].map(lambda x: mapping_dict[x])
     
-    # 기존 컬럼 드랍 & 리네임
-    ratings_merged = ratings_merged.drop(['writer', 'director'], axis=1)
-    ratings_merged.rename(columns={'writer_encoded': 'writer'}, inplace=True)
-    ratings_merged.rename(columns={'director_encoded': 'director'}, inplace=True)
-    return ratings_merged
-
-
-def encode_genre(ratings_merged: pd.DataFrame) -> pd.DataFrame:
-    """
-    장르(genre) 열을 레이블 인코딩합니다.
-
-    Args:
-        ratings_merged (pd.DataFrame): 데이터프레임 (genre 열 포함).
-
-    Returns:
-        pd.DataFrame: genre가 인코딩된 데이터프레임.
-    """
-    # 장르 인코딩
-    genre_encoder = LabelEncoder()
-    ratings_merged['genre_encoded'] = genre_encoder.fit_transform(ratings_merged['genre'])
-    # 기존 컬럼 드랍 & 리네임
-    ratings_merged = ratings_merged.drop(['genre'], axis=1)
-    ratings_merged.rename(columns={'genre_encoded': 'genre'}, inplace=True)
-    return ratings_merged
+    # user 기준 정렬 및 인덱스 리셋
+    df = df.sort_values(by=['user'])
+    df.reset_index(drop=True, inplace=True)
+    return df
