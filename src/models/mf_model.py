@@ -20,7 +20,7 @@ def sgd(P, Q, b, b_u, b_i, samples, learning_rate, regularization):
         Q[item_id, :] += learning_rate * (error * P[user_id, :] - regularization * Q[item_id, :])
 
 
-def binary_croos_entropy(R, predicted_R):
+def binary_cross_entropy(R, predicted_R):
     delta = 1e-7
     bce_matrix = -(R * np.log(predicted_R + delta) + (1 - R) * np.log(1 - predicted_R + delta))
     return bce_matrix.mean()
@@ -65,7 +65,7 @@ class MatrixFactorization(object):
             np.random.shuffle(self.samples)
             sgd(self.P, self.Q, self.b, self.b_u, self.b_i, self.samples, self.learning_rate, self.regularization)
             predicted_R = np.clip(self.get_predicted_full_matrix(), 0, 1)
-            bce = binary_croos_entropy(self.R, predicted_R)
+            bce = binary_cross_entropy(self.R, predicted_R)
 
             if self.verbose and (epoch % 10 == 0):
                 print("epoch: {} and Binary-Cross entropy: {}".format(epoch, bce))
