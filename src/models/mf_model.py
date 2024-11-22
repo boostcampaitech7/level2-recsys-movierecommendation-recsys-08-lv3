@@ -63,9 +63,7 @@ class MatrixFactorization(object):
         for epoch in tqdm(range(1, self.epochs + 1)):
             print("{} start".format(epoch))
             np.random.shuffle(self.samples)
-            sgd(
-                self.P, self.Q, self.b, self.b_u, self.b_i, self.samples, self.learning_rate, self.regularization
-            )  # 추가
+            sgd(self.P, self.Q, self.b, self.b_u, self.b_i, self.samples, self.learning_rate, self.regularization)
             predicted_R = np.clip(self.get_predicted_full_matrix(), 0, 1)
             bce = binary_croos_entropy(self.R, predicted_R)
 
