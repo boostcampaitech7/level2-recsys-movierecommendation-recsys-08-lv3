@@ -57,7 +57,7 @@ class MatrixFactorization(object):
             for column in range(self.num_items):
                 if self.R[row, column] > 0:
                     self.samples.append((row, column, self.R[row, column]))
-                elif random.random() < 0.2:  # negative sampling 수정하기
+                elif random.random() < 0.2:
                     self.samples.append((row, column, self.R[row, column]))
 
         for epoch in tqdm(range(1, self.epochs + 1)):
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     K = 50
     learning_rate = 0.002
     regularization = 0.2
-    epochs = 50
+    epochs = 10
     verbose = True
 
     mf_model = MatrixFactorization(R, K, epochs, learning_rate, regularization, verbose)
@@ -118,4 +118,4 @@ if __name__ == "__main__":
             user_item_pairs.append([user, item])
 
     recommendations_df = pd.DataFrame(user_item_pairs, columns=["user", "item"])
-    recommendations_df.to_csv("user_item_recommendations.csv", index=False)
+    recommendations_df.to_csv("user_item.csv", index=False)
