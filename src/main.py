@@ -1,8 +1,8 @@
 import argparse
+from sklearn import train_valid_split
 
 def main():
-
-    data= train_valid_split():
+    data= train_valid_split()
     train(data)
     args.model
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     arg('--seed','-s','--s',type=int,
         help= '시드설정')
     arg('--device', '-d', '--d', type=str, 
-        , help='사용할 디바이스를 선택할 수 있습니다.')
+        help='사용할 디바이스를 선택할 수 있습니다.')
     arg('--negative',type=int,help='negative sampling갯수를 지정합니다')
     #arg('--dataloader', '--dl', '-dl', type=ast.literal_eval)
     #arg('--dataset', '--dset', '-dset', type=ast.literal_eval)
