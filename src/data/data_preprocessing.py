@@ -1,9 +1,7 @@
 from sklearn.preprocessing import LabelEncoder
-from pandarallel import pandarallel
+import torch
 import pandas as pd
 
-# Pandarallel 초기화
-pandarallel.initialize(progress_bar=True)
 
 # 결측값 처리
 def handle_all_missing(data: pd.DataFrame) -> pd.DataFrame:
@@ -35,14 +33,24 @@ def handle_partial_missing(data: pd.DataFrame) -> pd.DataFrame:
     )
     return data
 
-def fill_missing_years_parallel(data: pd.DataFrame) -> pd.DataFrame:
+def fill_missing_years_pytorch(data: pd.DataFrame) -> pd.DataFrame:
     """
-    title에서 개봉년도를 추출하여 year의 결측치를 병렬 처리로 채우는 함수.
+    title에서 개봉년도를 추출하여 year의 결측치를 PyTorch 텐서 연산으로 채우는 함수.
     """
-    data["year"] = data.parallel_apply(
-        lambda row: row["title"].split('(')[-1].split(')')[0] if pd.isnull(row["year"]) and '(' in row["title"] else row["year"],
-        axis=1
-    )
+    # 문자열 데이터를 텐서로 변환
+    title_tensor = torch.tensor(data["title"].to_numpy(), dtype=torch.object)
+    year_tensor = torch.tensor(data["year"].to_numpy(), dtype=torch.object)
+
+    # 연산
+    def extract_year(title, year):
+        if year is None and "(" in title:
+            return title.split("(")[-1].split(")")[0]
+        return year
+
+    filled_years = [
+        extract_year(title, year) for title, year in zip(title_tensor, year_tensor)
+    ]
+    data["year"] = filled_years
     return data
 
 # 레이블 인코딩
