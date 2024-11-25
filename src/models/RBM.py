@@ -173,7 +173,7 @@ ratings_file = os.path.join(data_path, "train_ratings.csv")
 sequence_length = 10    # 시퀀스 길이
 num_epochs = 5
 learning_rate = 1e-3
-batch_size = 64
+batch_size = 128
 
 # 디바이스 설정
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -181,12 +181,12 @@ print("Using device:", device)
 
 # 학습 데이터셋 및 데이터로더 생성
 train_dataset = RatingsDataset(ratings_file, sequence_length, is_train=True)
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True, persistent_workers=True, prefetch_factor=4)
 
 # 모델 초기화
 visible_size = train_dataset.num_items   # 아이템 수가 가시층 크기
-hidden_size = 500
-lstm_hidden_size = 256
+hidden_size = 1000
+lstm_hidden_size = 512
 num_layers = 1
 
 model = LSTM_RBM(visible_size, hidden_size, lstm_hidden_size, num_layers).to(device)
@@ -199,7 +199,7 @@ valid_dataset = RatingsDataset(ratings_file, sequence_length,
                                item2idx=train_dataset.item2idx,
                                idx2item=train_dataset.idx2item,
                                is_train=False)
-valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
+valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True, prefetch_factor = 4)
 
 # 예측 및 결과 저장
 model.eval()
