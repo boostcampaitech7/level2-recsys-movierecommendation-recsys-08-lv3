@@ -17,11 +17,11 @@ class EASE:
         G[diag_idx, diag_idx] += self._lambda  # (X^T)X + (lambda)I
         P = np.linalg.inv(G)  # (X^T)X + (lambda)I 역행렬
 
-        self.B = P / -np.diag(P)
-        self.B[diag_idx, diag_idx] = 0
+        self.B = P / -np.diag(P)  # 최종 B
+        self.B[diag_idx, diag_idx] = 0  # 대각 값 0
 
     def predict(self, X):
-        return np.dot(X.toarray(), self.B)
+        return np.dot(X.toarray(), self.B)  # 예측 점수 계산
 
 
 def predict_each_user(predict_result, X, encode_user, encode_item):
@@ -31,14 +31,14 @@ def predict_each_user(predict_result, X, encode_user, encode_item):
 
     for user_idx in range(n_users):
         user_row = X[user_idx].toarray().flatten()
-        see_user = np.where(user_row > 0)[0]
+        see_user = np.where(user_row > 0)[0]  # 시청한 item idx 찾기
 
         scores = predict_result[user_idx]
-        scores[see_user] = -np.inf
+        scores[see_user] = -np.inf  # 시청한 item 제거
 
         top_items_idx = np.argsort(scores)[-10:][::-1]
-        top_items = encode_item.inverse_transform(top_items_idx)
-        user_id = encode_user.inverse_transform([user_idx])[0]
+        top_items = encode_item.inverse_transform(top_items_idx)  # 원래 item id로
+        user_id = encode_user.inverse_transform([user_idx])[0]  # 원래 user id로
 
         for item in top_items:
             result.append([user_id, item])
@@ -58,8 +58,8 @@ def data_pre_for_ease(data_path):
 
 
 def encode_users_items(data):
-    encode_user = LabelEncoder()
-    encode_item = LabelEncoder()
+    encode_user = LabelEncoder()  # user encoder
+    encode_item = LabelEncoder()  # item encoder
     users = encode_user.fit_transform(data["user"])
     items = encode_item.fit_transform(data["item"])
 
@@ -76,19 +76,18 @@ if __name__ == "__main__":
     data, interaction = data_pre_for_ease(data_path)
     users, items, encode_user, encode_item = encode_users_items(data)
 
-    # CSR matrix로 변환
+    # CSR matrix
     X = create_csr_matrix(users, items, interaction)
 
     _lambda = 450
-
     ease_model = EASE(_lambda)
+
     print("Train")
     ease_model.train(X)
-    print("predict")
+    print("predict score")
     predict_result = ease_model.predict(X)
-
-    print("each for user predict")
+    print("item 10 for each user")
     recommendations_df = predict_each_user(predict_result, X, encode_user, encode_item)
 
-    # csv 파일 생성
+    # 제출 파일 생성
     recommendations_df.to_csv("ease.csv", index=False)
