@@ -243,6 +243,6 @@ print(f"Recall@10: {recall_at_10:.4f}")
 predictions_df = pd.DataFrame(predictions)
 
 # CSV 파일로 저장
-output_file = "predictions.csv"
+output_file = "lstm_rbm.csv"
 predictions_df.to_csv(output_file, index=False)
 print(f"Predictions saved to {output_file}")
