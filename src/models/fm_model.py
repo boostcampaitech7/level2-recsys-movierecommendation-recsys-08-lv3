@@ -4,8 +4,10 @@ from functools import partial
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 
 def data_load(data_path):
@@ -190,6 +192,155 @@ def prepare_batch(batch, n_user, n_item, n_genre, n_writer, n_director, padding_
     return user_tensor, item_tensor, genre_tensor, writer_tensor, director_tensor, year_tensor, rating_tensor
 
 
+class FMModel(nn.Module):
+    def __init__(self, num_features, embed_dim, padding_idx):
+        super(FMModel, self).__init__()
+        self.num_features = num_features
+        self.embed_dim = embed_dim
+
+        self.linear = nn.Embedding(num_features, 1, padding_idx=padding_idx)
+        self.bias = nn.Parameter(torch.zeros(1))
+
+        self.embedding = nn.Embedding(num_features, embed_dim, padding_idx=padding_idx)
+        nn.init.xavier_uniform_(self.embedding.weight)
+
+        self.continuous_linear = nn.Linear(1, 1)
+        self.continuous_embedding = nn.Linear(1, embed_dim)
+
+    def forward(self, categorical_features, continuous_features):
+        linear_output = self.linear(categorical_features).sum(dim=1) + self.bias
+        continuous_linear_output = self.continuous_linear(continuous_features).squeeze()
+
+        embed_x = self.embedding(categorical_features)
+        embed_continuous = self.continuous_embedding(continuous_features)
+        all_embeddings = torch.cat([embed_x, embed_continuous.unsqueeze(1)], dim=1)
+
+        sum_square = torch.sum(all_embeddings, dim=1) ** 2
+        square_sum = torch.sum(all_embeddings**2, dim=1)
+        interaction_output = 0.5 * torch.sum(sum_square - square_sum, dim=1)
+
+        return linear_output.squeeze() + continuous_linear_output + interaction_output
+
+
+def train_fm_model(model, dataloader, epochs, learning_rate, device):
+    model.to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    criterion = nn.BCEWithLogitsLoss()
+
+    model.train()
+    for epoch in range(epochs):
+        total_loss = 0.0
+        for batch in tqdm(dataloader, desc="Training", unit="batch"):
+            user_tensor, item_tensor, genre_tensor, writer_tensor, director_tensor, year_tensor, rating_tensor = batch
+            categorical_features = torch.cat(
+                [user_tensor.unsqueeze(1), item_tensor.unsqueeze(1), genre_tensor, writer_tensor, director_tensor],
+                dim=1,
+            )
+
+            categorical_features = categorical_features.to(device)
+            year_tensor = year_tensor.to(device).unsqueeze(1)
+            rating_tensor = rating_tensor.to(device)
+
+            predictions = model(categorical_features, year_tensor)
+            loss = criterion(predictions, rating_tensor)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss / len(dataloader):.4f}")
+
+    return model
+
+
+def recommend_for_all_users(model, encode_user, encode_item, user_interactions, features, device="cpu"):
+    model.eval()
+    all_recommendations = []
+
+    n_user = len(encode_user.classes_)
+    n_item = len(encode_item.classes_)
+
+    user_ids = list(range(n_user))
+    item_ids = list(range(n_user, n_user + n_item))
+
+    for user_id in tqdm(user_ids, desc="Recommending for users", unit="user"):
+        interacted_items = user_interactions.get(user_id, [])
+        candidate_items = [item for item in item_ids if item not in interacted_items]
+
+        if not candidate_items:
+            continue
+
+        user_tensor = torch.tensor([user_id] * len(candidate_items), dtype=torch.long, device=device)
+        item_tensor = torch.tensor(candidate_items, dtype=torch.long, device=device)
+
+        genre_tensor = torch.tensor([features["genre"]] * len(candidate_items), dtype=torch.long, device=device)
+        writer_tensor = torch.tensor([features["writer"]] * len(candidate_items), dtype=torch.long, device=device)
+        director_tensor = torch.tensor([features["director"]] * len(candidate_items), dtype=torch.long, device=device)
+        year_tensor = torch.tensor([features["year"]] * len(candidate_items), dtype=torch.float32, device=device)
+
+        categorical_features = torch.cat(
+            [user_tensor.unsqueeze(1), item_tensor.unsqueeze(1), genre_tensor, writer_tensor, director_tensor], dim=1
+        )
+
+        with torch.no_grad():
+            predictions = model(categorical_features, year_tensor.unsqueeze(1))
+
+        sorted_indices = torch.argsort(predictions, descending=True)
+        top_n_indices = sorted_indices[:10]
+
+        recommended_encoded_items = [candidate_items[i] - n_user for i in top_n_indices]
+
+        recommendations = encode_item.inverse_transform(recommended_encoded_items)
+
+        original_user_id = encode_user.inverse_transform([user_id])[0]
+
+        for item in recommendations:
+            all_recommendations.append({"user": original_user_id, "item": item})
+
+    recommendations_df = pd.DataFrame(all_recommendations)
+    return recommendations_df
+
+
+def get_features(df, n_user, n_item, n_genre, n_writer, n_director, padding_idx):
+    features = {"genre": {}, "writer": {}, "director": {}, "year": {}}
+
+    for item_id in df["item"].unique():
+        item_data = df[df["item"] == item_id]
+
+        genre_offset = [g + n_user + n_item for g in item_data["genre"].values[0]]
+        writer_offset = (
+            [w + n_user + n_item + n_genre for w in item_data["writer"].values[0]]
+            if len(item_data["writer"].values[0]) > 0
+            else []
+        )
+        director_offset = (
+            [d + n_user + n_item + n_genre + n_writer for d in item_data["director"].values[0]]
+            if len(item_data["director"].values[0]) > 0
+            else []
+        )
+
+        year = item_data["year"].values[0]
+
+        features["genre"][item_id] = genre_offset
+        features["writer"][item_id] = writer_offset
+        features["director"][item_id] = director_offset
+        features["year"][item_id] = year
+
+    max_genre_length = max(len(v) for v in features["genre"].values())
+    max_writer_length = max(len(v) for v in features["writer"].values())
+    max_director_length = max(len(v) for v in features["director"].values())
+
+    for item_id in features["genre"].keys():
+        features["genre"][item_id] = pad_sequences([features["genre"][item_id]], max_genre_length, padding_idx)[0]
+        features["writer"][item_id] = pad_sequences([features["writer"][item_id]], max_writer_length, padding_idx)[0]
+        features["director"][item_id] = pad_sequences(
+            [features["director"][item_id]], max_director_length, padding_idx
+        )[0]
+
+    return features
+
+
 if __name__ == "__main__":
     data_path = "/data/ephemeral/home/lee/data/train/"
     train_rating, title, year, director, genre, writer = data_load(data_path)
@@ -206,8 +357,9 @@ if __name__ == "__main__":
     train_ratings = pd.concat([train_ratings, neg_df], axis=0)
     train_ratings = train_ratings.sort_values(by="user").reset_index(drop=True)
 
-    # encoder
     train_ratings, encode_user, encode_item = user_and_item_encoder(train_ratings)
+    user_interactions = train_ratings.groupby("user")["item"].apply(list).to_dict()
+
     genres, encode_genre = genre_encoder(genres)
     writers, encode_writer = writer_encoder(writers)
     directors, encode_director = director_encoder(directors)
@@ -219,6 +371,9 @@ if __name__ == "__main__":
     )
 
     padding_idx = n_user + n_item + n_genre + n_writer + n_director
+
+    print("make feature")
+    features = get_features(df, n_user, n_item, n_genre, n_writer, n_director, padding_idx)
     dataset = FMDataset(df)
 
     collate_fn = partial(
@@ -232,3 +387,20 @@ if __name__ == "__main__":
     )
 
     dataloader = DataLoader(dataset, batch_size=2048, collate_fn=collate_fn)
+    num_features = padding_idx + 1
+    embed_dim = 16
+    print("model define")
+    fm_model = FMModel(num_features=num_features, embed_dim=embed_dim, padding_idx=padding_idx)
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    epochs = 5
+    learning_rate = 0.001
+    print("train")
+    fm_model = train_fm_model(fm_model, dataloader, epochs, learning_rate, device)
+
+    print("predict")
+    recommendations_df = recommend_for_all_users(
+        fm_model, encode_user, encode_item, user_interactions, features, device=device
+    )
+
+    recommendations_df.to_csv("fm_model.csv", index=False)
