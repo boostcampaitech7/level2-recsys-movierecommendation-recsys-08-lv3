@@ -256,6 +256,7 @@ def train_fm_model(model, dataloader, epochs, learning_rate, device):
 
 def recommend_for_all_users(model, encode_user, encode_item, user_interactions, features, device="cpu"):
     model.eval()
+    model.to(device)
     all_recommendations = []
 
     n_user = len(encode_user.classes_)
@@ -274,10 +275,26 @@ def recommend_for_all_users(model, encode_user, encode_item, user_interactions, 
         user_tensor = torch.tensor([user_id] * len(candidate_items), dtype=torch.long, device=device)
         item_tensor = torch.tensor(candidate_items, dtype=torch.long, device=device)
 
-        genre_tensor = torch.tensor([features["genre"]] * len(candidate_items), dtype=torch.long, device=device)
-        writer_tensor = torch.tensor([features["writer"]] * len(candidate_items), dtype=torch.long, device=device)
-        director_tensor = torch.tensor([features["director"]] * len(candidate_items), dtype=torch.long, device=device)
-        year_tensor = torch.tensor([features["year"]] * len(candidate_items), dtype=torch.float32, device=device)
+        genre_tensor = torch.tensor(
+            [features["genre"].get(item_id - n_user, []) for item_id in candidate_items],
+            dtype=torch.long,
+            device=device,
+        )
+        writer_tensor = torch.tensor(
+            [features["writer"].get(item_id - n_user, []) for item_id in candidate_items],
+            dtype=torch.long,
+            device=device,
+        )
+        director_tensor = torch.tensor(
+            [features["director"].get(item_id - n_user, []) for item_id in candidate_items],
+            dtype=torch.long,
+            device=device,
+        )
+        year_tensor = torch.tensor(
+            [features["year"].get(item_id - n_user, 0.0) for item_id in candidate_items],
+            dtype=torch.float32,
+            device=device,
+        )
 
         categorical_features = torch.cat(
             [user_tensor.unsqueeze(1), item_tensor.unsqueeze(1), genre_tensor, writer_tensor, director_tensor], dim=1
@@ -353,6 +370,10 @@ if __name__ == "__main__":
         writer.copy(),
     )
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(torch.cuda.is_available())
+    print(device)
+
     neg_df = sample_negative_items(train_ratings, 50)
     train_ratings = pd.concat([train_ratings, neg_df], axis=0)
     train_ratings = train_ratings.sort_values(by="user").reset_index(drop=True)
@@ -392,13 +413,13 @@ if __name__ == "__main__":
     print("model define")
     fm_model = FMModel(num_features=num_features, embed_dim=embed_dim, padding_idx=padding_idx)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    epochs = 5
+    epochs = 10
     learning_rate = 0.001
     print("train")
     fm_model = train_fm_model(fm_model, dataloader, epochs, learning_rate, device)
 
     print("predict")
+
     recommendations_df = recommend_for_all_users(
         fm_model, encode_user, encode_item, user_interactions, features, device=device
     )
