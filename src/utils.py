@@ -29,8 +29,9 @@ def save_to_csv(args, data, predictions):
     predictions['item'] = predictions['item'].apply(lambda x: idx2item[x])
     
     # Drop the score column
-    predictions = predictions.drop(columns=['score'])
-    
+    if 'score' in predictions.columns:
+        predictions = predictions.drop(columns=['score'])
+
     # Define the output directory and file path
     output_dir = args.output_path
     output_file = os.path.join(output_dir, 'predictions.csv')
