@@ -74,7 +74,6 @@ if __name__ == "__main__":
     data_path = "/data/ephemeral/home/lee/data/train/"
     # EASE에 맞는 data 처리
     data, interaction = data_pre_for_ease(data_path)
-    users, items, encode_user, encode_item = encode_users_items(data)
 
     # CSR matrix
     X = create_csr_matrix(users, items, interaction)
