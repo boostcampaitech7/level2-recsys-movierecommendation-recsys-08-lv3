@@ -16,6 +16,7 @@ device: cuda    # 가능한 값 : cpu, cuda, mps
 model: DeepFM       # 모델 선택
 negative: 50
 split_size: 0.2
+output_path: saved/
 
 model_args:     # model에 해당하는 파라미터만 실질적으로 사용됩니다.
     FM: 
