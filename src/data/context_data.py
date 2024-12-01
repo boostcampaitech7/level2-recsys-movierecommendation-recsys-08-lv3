@@ -1,35 +1,13 @@
 import pandas as pd
 import numpy as np
 import os
+from .basic_data import basic_data_load
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 import torch
 
 def context_data_load(args):
-    data_path = args.datapath
-    rating_data_df = pd.read_csv(os.path.join(data_path, 'train_ratings.csv'))
-    rating_data_df.drop(['time'], axis=1, inplace=True)
-    rating_data_df['interaction']=1
-    
-    label2idx = {}
-    idx2label = {}
-
-    for col in rating_data_df.columns:
-        unique_label = rating_data_df[col].unique()
-        label2idx[col] = {label: idx for idx, label in enumerate(unique_label)}
-        idx2label[col] = {idx: label for idx, label in enumerate(unique_label)}
-    
-    rating_data_df['user'] = rating_data_df['user'].map(label2idx['user'])
-    rating_data_df['item'] = rating_data_df['item'].map(label2idx['item'])
-
-    data = {
-        'total': rating_data_df,
-        'label2idx': label2idx,
-        'idx2label': idx2label
-    }
-    
-    #user 와 item categori화 (deepfm) 필요.
-    return data
+    return basic_data_load(args)
 
 # 최종 train_test_split 도출
 def context_data_split(args,data):
