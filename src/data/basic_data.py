@@ -1,25 +1,8 @@
 import torch
 import numpy as np
 import pandas as pd
-from torch.nn.utils import Dataset
 import os
 from scipy.sparse import csr_matrix
-
-class InteractionDataset(Dataset):
-    def __init__(self, interaction_matrix):
-        # interaction_matrix는 numpy 배열 또는 PyTorch 텐서여야 함
-        if isinstance(interaction_matrix, np.ndarray):
-            self.data = torch.FloatTensor(interaction_matrix)
-        elif isinstance(interaction_matrix, torch.Tensor):
-            self.data = interaction_matrix
-        else:
-            raise ValueError("interaction_matrix must be a numpy array or PyTorch tensor")
-
-    def __len__(self):
-        return self.data.size(0)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
 
 # ---------------------- 데이터 전처리 함수 ----------------------
 def basic_data_load(args):

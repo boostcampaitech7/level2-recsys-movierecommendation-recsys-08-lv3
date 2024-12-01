@@ -12,8 +12,8 @@ memo: |-
 datapath: data/train/ 
 predict: False  # 예측할 경우 True로 설정
 seed: 42         # 시드 고정
-device: cuda    # 가능한 값 : cpu, cuda, mps
-model: DeepFM       # 모델 선택
+device: cpu    # 가능한 값 : cpu, cuda, mps
+model: SLIM       # 모델 선택
 negative: 50
 split_size: 0.2
 output_path: saved/
@@ -29,6 +29,12 @@ model_args:     # model에 해당하는 파라미터만 실질적으로 사용�
         mlp_dims: [16, 32]  # MLP_Base의 히든 레이어 차원
         dropout: 0.2        # MLP_Base에서 드롭아웃 비율
         epochs: 10
+    SLIM:
+        datatype: basic
+        l1_reg: 0.91
+        l2_reg: 0.91
+        alpha: 0.0002
+        max_iter : 73
 
 dataloader:
     batch_size: 1024    # 배치 사이즈
