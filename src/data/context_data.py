@@ -9,6 +9,7 @@ def context_data_load(args):
     data_path = args.datapath
     rating_data_df = pd.read_csv(os.path.join(data_path, 'train_ratings.csv'))
     rating_data_df.drop(['time'], axis=1, inplace=True)
+    rating_data_df['interaction']=1
     
     label2idx = {}
     idx2label = {}
@@ -48,8 +49,6 @@ def context_data_split(args,data):
     train_data = pd.concat(train_list, axis=0, ignore_index=True)
     valid_data = pd.concat(valid_list, axis=0, ignore_index=True)
     # Add train and valid splits to the data dictionary
-    train_data['interaction']=1
-    valid_data['interaction']=1
     data['train'] = train_data
     data['valid'] = valid_data
 
