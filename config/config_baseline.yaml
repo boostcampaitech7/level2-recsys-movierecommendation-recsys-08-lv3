@@ -31,6 +31,9 @@ model_args:     # model에 해당하는 파라미터만 실질적으로 사용�
         l2_reg: 0.91
         alpha: 0.0002
         max_iter : 73
+    EASE:
+        datatype: basic
+        lambda : 350
 
 dataloader:
     batch_size: 1024    # 배치 사이즈
