@@ -11,12 +11,7 @@
 | :--: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | 이름 |                            한선우                            |                            신승훈                            |                            이경민                            |                            김민준                            |                            박광진                            |                            김영찬                            |
 | 담당 |                          Model                            |                          Model                            |                          Model                            |                          Model                            |                          Model                            |                          Model                            |
-| 역할 |             Negative Sampling, GNN, SASRec              |
-NCF, DeepFM                |
-FM, EASE, MF                |             
-Negative Sampling, Recbole             |                   
-RBM with LSTM, NARM, RecVAE, SLIM, MultiVAE, Ensemble                    |
-SASRec, S^3 Rec, BERTRec, NCF, Ensemble                    |
+| 역할 |             Negative Sampling, GNN, SASRec               |         NCF, DeepFM                |             FM, EASE, MF                |             Negative Sampling, Recbole             |                   RBM with LSTM, NARM, RecVAE, SLIM, MultiVAE, Ensemble                    |          SASRec, S^3 Rec, BERTRec, NCF, Ensemble                    |
 
 
 
