@@ -90,18 +90,13 @@ pip install -r requirements.txt
 <br/>
 
 ### 코드 및 설명
-
-1. run.sh 
---> bash 파일로 deepFM, EASE, SLIM을 train, prediction까지 진행합니다 
-2. main.py 
---> Argparser 형식을 지정하고 config.yaml 파일과 통합 하며 main.py를 진행합니다.
-3. models
--->  모델의 아케틱쳐파일들을 포함하고있습니다
-4. train
---> trainer의 역할을 하는 각 모델의 클라스를 구현한 파일들을 포함하고있습니다
-5. data
---> basic_data(matrix) 와 context_data (sideInformation 합침) 를 구성합니다.
-
+- **`run.sh`**: **DeepFM**, **EASE**, **SLIM** 모델의 학습 및 예측 과정을 자동으로 실행하는 Bash 스크립트입니다.
+- **`main.py`**: **Argparser** 형식을 정의하고 `config.yaml` 파일과 통합하여 파이프라인을 실행하는 파일입니다.
+- **`models/`**: 구현된 모델들의 아키텍처 파일을 포함하고 있습니다.
+- **`train/`**: 각 모델의 학습 로직을 구현한 트레이너 클래스가 포함되어 있습니다.
+- **`data/`**:
+  - **`basic_data/`**: 기본 입력 데이터로 사용되는 행렬 기반 데이터가 포함되어 있습니다.
+  - **`context_data/`**: 기본 행렬 데이터와 부가 정보를 결합한 데이터를 포함하고 있습니다.
 
 
 <br/>
