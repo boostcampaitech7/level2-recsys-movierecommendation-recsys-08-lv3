@@ -1,0 +1,23 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+
+# Black formatting hook
+-   repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+    -   id: black
+        args: ['--line-length=120']  # 줄 길이 설정을 120로 맞춤
+
+# Add isort for import sorting
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1  # Use the latest stable version
+    hooks:
+    -   id: isort
