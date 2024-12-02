@@ -20,7 +20,7 @@
 
 ## 폴더구조
 
-(./img/dir_img.png)
+(./img/dir_img.png.png)
 
 
 
