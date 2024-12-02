@@ -250,7 +250,7 @@ weights
 *.jpg
 data.tar.gz
 *.csv
-*.ipynb
+#*.ipynb
 *.html
 mlruns
 mlartifacts
