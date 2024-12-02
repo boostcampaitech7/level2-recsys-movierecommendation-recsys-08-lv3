@@ -1,0 +1,42 @@
+# config.yaml
+# 직접 하이퍼파라미터를 추가하여 관리할 수 있습니다.
+
+memo: |-
+    남겨둘 메모가 있다면 여기에.
+    여러 줄로도 작성 가능
+
+
+# 아래의 일곱 항목들은 argparser로 받은 인자를 우선적으로 사용합니다.
+#   $ python main.py --config config.yaml --seed 2024
+#   과 같이 실행할 경우 seed는 0이 아닌 2024로 설정됩니다.
+datapath: data/train/ 
+predict: False  # 예측할 경우 True로 설정
+seed: 42         # 시드 고정
+device: cpu    # 가능한 값 : cpu, cuda, mps
+model: SLIM       # 모델 선택
+negative: 50
+split_size: 0.2
+output_path: saved/
+
+model_args:     # model에 해당하는 파라미터만 실질적으로 사용됩니다.
+    DeepFM:
+        datatype: context   # basic, context, image, text 중 basic, context 가능
+        embed_dim: 16       # sparse 벡터를 임베딩할 차원
+        mlp_dims: [16, 32]  # MLP_Base의 히든 레이어 차원
+        dropout: 0.2        # MLP_Base에서 드롭아웃 비율
+        epochs: 10
+    SLIM:
+        datatype: basic
+        l1_reg: 0.91
+        l2_reg: 0.91
+        alpha: 0.0002
+        max_iter : 73
+    EASE:
+        datatype: basic
+        lambda : 350
+
+dataloader:
+    batch_size: 1024    # 배치 사이즈
+    shuffle: True       # 학습 데이터 셔플 여부
+    num_workers: 0      # 멀티프로세서 수. 0: 메인프로세서만 사용
+
