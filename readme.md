@@ -7,19 +7,11 @@
 
 ## Team
 
-| icon | <img src="./img/user_icon_1.webp" alt="user_icon_1" style="zoom:20%;" /> | <img src="./img/user_icon_2.webp" alt="user_icon_2" style="zoom:20%;" /> | <img src="./img/user_icon_3.webp" alt="user_icon_3" style="zoom:20%;" /> | <img src="./img/user_icon_4.webp" alt="user_icon_4" style="zoom:20%;" /> | <img src="./img/user_icon_5.webp" alt="user_icon_5" style="zoom:20%;" /> | <img src="./img/user_icon_6.webp" alt="user_icon_6" style="zoom:20%;" /> |
+| icon | <img src="./img/user_icon_1.webp" alt="user_icon_1" style="zoom:20%;" /> | <img src="./img/user_icon_2.webp" alt="user_icon_2" style="zoom:20%;" /> | <img src="./img/user_icon_3.webp" alt="user_icon_3" style="zoom:100%;" /> | <img src="./img/user_icon_4.webp" alt="user_icon_4" style="zoom:100%;" /> | <img src="./img/user_icon_5.webp" alt="user_icon_5" style="zoom:20%;" /> | <img src="./img/user_icon_6.webp" alt="user_icon_6" style="zoom:20%;" /> |
 | :--: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| 이름 |                            
-한선우                            |                            신승훈                            |                            이경민                            |                            김민준                            |                            박광진                            |                            김영찬                            |
-| 담당 |                          
-Model                            |                          Model                            |                          Model                            |                          Model                            |                          Model                            |                          Model                            |
-| 역할 |             
-Negative Sampling, GNN, SASRec              |
-NCF, DeepFM                |
-FM, EASE, MF                |             
-Negative Sampling, Recbole             |                   
-RBM with LSTM, NARM, RecVAE, SLIM, MultiVAE, Ensemble                    |
-SASRec, S^3 Rec, BERTRec, NCF, Ensemble                    |
+| 이름 |                            한선우                            |                            신승훈                            |                            이경민                            |                            김민준                            |                            박광진                            |                            김영찬                            |
+| 담당 |                          Model                            |                          Model                            |                          Model                            |                          Model                            |                          Model                            |                          Model                            |
+| 역할 |             Negative Sampling, GNN, SASRec               |         NCF, DeepFM                |             FM, EASE, MF                |             Negative Sampling, Recbole             |                   RBM with LSTM, NARM, RecVAE, SLIM, MultiVAE, Ensemble                    |          SASRec, S^3 Rec, BERTRec, NCF, Ensemble                    |
 
 
 
@@ -28,7 +20,7 @@ SASRec, S^3 Rec, BERTRec, NCF, Ensemble                    |
 
 ## 폴더구조
 
-(./img/dir_img.png)
+![image-20241028223652317](./img/dir_img.png.png)
 
 
 
@@ -75,30 +67,19 @@ SASRec, S^3 Rec, BERTRec, NCF, Ensemble                    |
 
 ### 협업 방법
 
-- 구글 공유 폴더: 회의록 작성 및 자료 공유
-- Github: 코드 및 프로젝트 관리
-- 기타 협업 툴 사용 (Zoom, Notion, Slack)
-
+- 구글 공유 폴더 (데이터 공유 용)
+- GitHub (issue, pr 로 전체적인 흐름 관리)
+- Notion (회의록, 보드로 프로젝트 관리)
+- RecBole
 
 <br/>
-
-### Feature Engineering
-
-| 데이터 구분     | 의미                                                         | Features                            |
-| --------------- | ------------------------------------------------------------ | ----------------------------------- |
-| 유저        | 유저의 연령대                            | age_range          |
-|                 | 유저의 나라                       | location_country |
-|  | 유저의 사는 주           | location_state                     |
-|                 | 유저의 사는도시                            | location_city            |
-| 책               | 책의 언어 | language                       |
-
 
 
 <br/>
 
 ### Install
 
-python version: 3.9x
+python version: 3.11x
 
 ```
 pip install -r requirements.txt
@@ -110,31 +91,16 @@ pip install -r requirements.txt
 
 ### 코드 및 설명
 
-- Fm & FFm
-  - FM.py/FFM.py: FM/FFM 모델을 위한 데이터 전처리와 train dataset으로 validation하는 코드입니다.
-  - FM_tuning.py/FFM_tuning.py: FM/FFM 모델의 하이퍼파라미터 튜닝을 하여 로그를 저장하는 코드입니다.
-  - FM_test.py/FFM_test.py: 튜닝을 통해 얻어낸 최적의 파라미터로 FM/FFM 모델을 학습시켜 test data의 평점을 예측하는 코드입니다.
-- DeepFm
-  - deepfm_train.py: DeepFm을 트레인하고 튜닝하는 파일입니다.
-  - deepfm_data.py: DeepFm 학습을 위한 데이터 가공 함수 및 데이터 불러오기 파일입니다.
-  - deepfm.py: DeepFm 모델 아키텍쳐를 클래스로 담고있는 파일입니다.
-- Wide & Deep
-  - wnd.py : wide&deep을 수행하는 모델 코드입니다.
-  - wnd_data.py : wide&deep을 수행하기 위한 데이터 전처리 코드입니다.
-  - wnd_train.py : wide&deep 모델로 학습을 실행하는 코드입니다.
-- DCN
-  - DCN_train.py: DCN 모델을 학습하고 평가하며 최종적으로 예측 결과를 제출 파일로 저장하는 코드 (DCN model을 실행시키는 코드).
-  - DCN_dataset.py: 데이터를 전처리하여 DCN 모델 학습에 적합한 형식으로 변환.
-  - DCN.py: Deep Cross Network 모델 구조를 정의하고 구현된 코드.
-- NGCF
-  - ngcf_models.py: NGCF 모델 코드입니다.
-  - ngcf_dataset.py: NGCF 모델 학습을 위한 데이터셋 코드 입니다.
-  - ngcf_train.py: ngcf 모델을 학습 및 테스트하는 코드입니다.
-
-- NCF: ncf_train.py을 통해 ncf model을 train 하는 파일입니다.
-  - ncf_dataset.py : data 로드 후 정수형 인덱스 변환 코드입니다
-  - ncf_model.py : ncf, neumf 모델을 정의한 코드입니다.
-  - ncf_train.py : 모델 train 하는 코드입니다.
+1. run.sh 
+--> bash 파일로 deepFM, EASE, SLIM을 train, prediction까지 진행합니다 
+2. main.py 
+--> Argparser 형식을 지정하고 config.yaml 파일과 통합 하며 main.py를 진행합니다.
+3. models
+-->  모델의 아케틱쳐파일들을 포함하고있습니다
+4. train
+--> trainer의 역할을 하는 각 모델의 클라스를 구현한 파일들을 포함하고있습니다
+5. data
+--> basic_data(matrix) 와 context_data (sideInformation 합침) 를 구성합니다.
 
 
 
