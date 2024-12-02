@@ -20,7 +20,7 @@
 
 ## 폴더구조
 
-(./img/dir_img.png.png)
+![image-20241028223652317](./img/dir_img.png.png)
 
 
 
@@ -73,17 +73,6 @@
 
 
 <br/>
-
-### Feature Engineering
-
-| 데이터 구분     | 의미                                                         | Features                            |
-| --------------- | ------------------------------------------------------------ | ----------------------------------- |
-| 유저        | 유저의 연령대                            | age_range          |
-|                 | 유저의 나라                       | location_country |
-|  | 유저의 사는 주           | location_state                     |
-|                 | 유저의 사는도시                            | location_city            |
-| 책               | 책의 언어 | language                       |
-
 
 
 <br/>
