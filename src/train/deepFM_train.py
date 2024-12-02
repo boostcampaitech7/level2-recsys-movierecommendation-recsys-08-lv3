@@ -166,3 +166,5 @@ class DeepFMTrainer:
                 predictions.extend([(user_id, item_id, score) for item_id, score in user_predictions])
 
         return pd.DataFrame(predictions, columns=['user', 'item', 'score'])
+
+

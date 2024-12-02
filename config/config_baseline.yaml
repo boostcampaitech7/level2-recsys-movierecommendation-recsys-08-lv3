@@ -19,10 +19,6 @@ split_size: 0.2
 output_path: saved/
 
 model_args:     # model에 해당하는 파라미터만 실질적으로 사용됩니다.
-    FM: 
-        datatype: context   # basic, context, image, text 중 basic, context 가능
-        embed_dim: 16       # sparse 벡터를 임베딩할 차원
-        epochs: 10
     DeepFM:
         datatype: context   # basic, context, image, text 중 basic, context 가능
         embed_dim: 16       # sparse 벡터를 임베딩할 차원
