@@ -20,7 +20,7 @@
 
 ## 폴더구조
 
-![image-20241028223652317](./img/dir_img.png.png)
+![image-20241028223652317](./img/dir.png)
 
 
 
