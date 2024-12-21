@@ -90,13 +90,18 @@ pip install -r requirements.txt
 <br/>
 
 ### 코드 및 설명
-- **`run.sh`**: **DeepFM**, **EASE**, **SLIM** 모델의 학습 및 예측 과정을 자동으로 실행하는 Bash 스크립트입니다.
-- **`main.py`**: **Argparser** 형식을 정의하고 `config.yaml` 파일과 통합하여 파이프라인을 실행하는 파일입니다.
-- **`models/`**: 구현된 모델들의 아키텍처 파일을 포함하고 있습니다.
-- **`train/`**: 각 모델의 학습 로직을 구현한 트레이너 클래스가 포함되어 있습니다.
-- **`data/`**:
-  - **`basic_data/`**: 기본 입력 데이터로 사용되는 행렬 기반 데이터가 포함되어 있습니다.
-  - **`context_data/`**: 기본 행렬 데이터와 부가 정보를 결합한 데이터를 포함하고 있습니다.
+- **`src`**
+  - **`models/`**: 구현된 모델의 아키텍처 파일을 포함합니다. (예: UnifiedDeepFM, SLIMModel, EASE).
+  - **`results`**: 학습 및 평가 결과가 저장되는 디렉토리입니다.
+    - **`models/`**: 학습된 모델 가중치 저장.
+    - **`logs/`**: 실행 및 학습 로그 저장.
+    - **`predictions/`**: 평가 시 생성된 예측 결과 저장.
+  - **`evaluate.py`**: 각 모델을 평가하는 함수들이 포함되어 있습니다.
+  - **`preprocessing.py`**: 데이터 로드 및 데이터 전처리와 관련된 함수들이 포함되어 있습니다.
+  - **`train.py`**: 각 모델의 학습 로직을 구현한 학습 함수가 포함되어 있습니다. (예: train_deepfm, train_slim, train_ease).
+  - **`utils.py`**: 공통적으로 사용되는 유틸리티 함수들을 포함합니다.
+- **`main.py`**: **Argparser**를 사용하여 실행 모드를 선택(train 또는 evaluate)하고, config.yaml 파일을 기반으로 전체 파이프라인을 실행합니다. 학습(train) 모드에서는 모델 학습과 저장을 수행하며, 평가(evaluate) 모드에서는 모델 평가 및 예측 결과를 저장합니다.
+
 
 
 <br/>
