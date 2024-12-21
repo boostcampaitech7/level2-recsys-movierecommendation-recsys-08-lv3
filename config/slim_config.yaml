@@ -1,0 +1,22 @@
+data:
+  datapath: data/train/
+  split_size: 0.2
+  seed: 42
+  predict: False
+
+model:
+  name: "SLIM"
+  datatype: "basic"
+  l1_reg: 0.91
+  l2_reg: 0.91
+  alpha: 0.0002
+  max_iter: 73
+
+train:
+  batch_size: 1024
+  output_path: saved/slim_model.pt
+  device: "cuda"
+
+dataloader:
+  shuffle: True
+  num_workers: 0

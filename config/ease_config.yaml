@@ -1,0 +1,19 @@
+data:
+  datapath: data/train/
+  split_size: 0.2
+  seed: 42
+  predict: False
+
+model:
+  name: "EASE"
+  datatype: "basic"
+  lambda: 350
+
+train:
+  output_path: saved/ease_model.pt
+  device: "cuda"
+
+dataloader:
+  batch_size: 1024
+  shuffle: True
+  num_workers: 0

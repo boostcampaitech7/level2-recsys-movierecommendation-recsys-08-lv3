@@ -1,47 +1,56 @@
-import random
 import os
+import random
 import numpy as np
 import torch
+from src.models import UnifiedDeepFM, SLIMModel, EASE
 
-def seed_everything(args):
-        '''
-        [description]
-        seed 값을 고정시키는 함수입니다.
+def seed_everything(seed):
+    """
+    Fix random seeds for reproducibility.
+    """
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
 
-        [arguments]
-        seed : seed 값
-        '''
-        seed=args.seed
-        random.seed(seed)
-        os.environ['PYTHONHASHSEED'] = str(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.backends.cudnn.deterministic = True
+def save_model(model, path):
+    """
+    Save model weights to a file.
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    torch.save(model.state_dict(), path)
+    print(f"Model saved to {path}")
 
-def save_to_csv(args, data, predictions):
-    # Convert user and item indices back to original labels
-    idx2user = data['idx2label']['user']
-    idx2item = data['idx2label']['item']
-    
-    # Map predictions back to their original labels
-    predictions['user'] = predictions['user'].apply(lambda x: idx2user[x])
-    predictions['item'] = predictions['item'].apply(lambda x: idx2item[x])
-    
-    # Drop the score column
-    if 'score' in predictions.columns:
-        predictions = predictions.drop(columns=['score'])
-
-    # Define the output directory and file path
-    output_dir = args.output_path
-    output_file = os.path.join(output_dir, 'predictions.csv')
-    
-    # Ensure the output directory exists
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        print(f"Directory '{output_dir}' created.")
-    
-    # Save predictions to CSV
-    predictions.to_csv(output_file, index=False)
-    print(f"Predictions saved to {output_file}")
-
+def initialize_model(model_name, params, data, device):
+    """
+    Initialize the appropriate model based on the configuration.
+    """
+    if model_name == "DeepFM":
+        return UnifiedDeepFM(
+            input_dims=[
+                len(data['label2idx']['user']),
+                len(data['label2idx']['item']),
+                len(data['label2idx']['genre']) + 1,
+                len(data['label2idx']['writer']),
+                len(data['label2idx']['director']),
+                10  # Example for year buckets
+            ],
+            embedding_dim=params['embed_dim'],
+            mlp_dims=params['mlp_dims'],
+            drop_rate=params['dropout']
+        ).to(device)
+    elif model_name == "SLIM":
+        return SLIMModel(
+            num_items=len(data['label2idx']['item']),
+            l1_reg=params['l1_reg'],
+            l2_reg=params['l2_reg'],
+            alpha=params['alpha'],
+            max_iter=params['max_iter'],
+            device=device
+        )
+    elif model_name == "EASE":
+        return EASE(_lambda=params['lambda'])
+    else:
+        raise ValueError(f"Unknown model: {model_name}")

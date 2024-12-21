@@ -1,0 +1,23 @@
+data:
+  datapath: data/train/
+  split_size: 0.2
+  seed: 42
+  predict: False
+
+model:
+  name: "DeepFM"
+  datatype: "context"
+  embed_dim: 16
+  mlp_dims: [16, 32]
+  dropout: 0.2
+  epochs: 10
+
+train:
+  batch_size: 1024
+  lr: 0.001
+  output_path: saved/deepfm_model.pt
+  device: "cuda"
+
+dataloader:
+  shuffle: True
+  num_workers: 0
