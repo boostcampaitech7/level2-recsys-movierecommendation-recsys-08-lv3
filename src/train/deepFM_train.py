@@ -26,7 +26,7 @@ class DeepFMTrainer:
         self.n_year = 10
 
     def _prepare_dataloader(self, dataframe, batch_size, shuffle=True):
-        dataset = InteractionDataset(
+        dataset = DeepFMDataset(
             dataframe=dataframe,
             n_user=self.n_user,
             n_item=self.n_item,
