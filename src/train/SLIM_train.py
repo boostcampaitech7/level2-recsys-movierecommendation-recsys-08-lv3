@@ -3,6 +3,7 @@ from src.models import SLIMModel
 import torch
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error
 
 class SLIMTrainer:
     def __init__(self, args,data):

@@ -1,7 +1,7 @@
 import numpy as np
 from src.models import EASE
 import pandas as pd
-import mean_squared_error
+from sklearn.metrics import mean_squared_error
 class EASETrainer:
     def __init__(self, args,data):
         """
