@@ -12,6 +12,7 @@ def context_data_load(args):
 # 최종 train_test_split 도출
 def context_data_split(args,data):
     """
+        train, valid 를 따로 총 데이터에서 나누는 역할을합니다.
     """
     # Temporary lists to store DataFrames
     train_list = []
