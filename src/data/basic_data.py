@@ -4,8 +4,10 @@ import pandas as pd
 import os
 from scipy.sparse import csr_matrix
 
-# ---------------------- 데이터 전처리 함수 ----------------------
 def basic_data_load(args):
+    '''
+        사이드 인포메이션을 쓰지않는 모델을 위한 기본데이터를 불러일으킵니다
+    '''
     data_path = args.datapath
     rating_data_df = pd.read_csv(os.path.join(data_path, 'train_ratings.csv'))
     rating_data_df.drop(['time'], axis=1, inplace=True)
@@ -40,9 +42,11 @@ def basic_data_load(args):
     return data
 
 def create_csr_matrix(users, items, values, num_users, num_items):
+    '''
+        행렬 형태의 데이터 전처리함수입니다.
+    '''
     return csr_matrix((values, (users, items)), shape=(num_users, num_items))
 
-# ---------------------- 데이터 전처리 함수 ----------------------
 def create_torch_sparse_matrix(users, items, values, num_users, num_items, device="cuda"):
     """
     PyTorch sparse tensor로 변환
