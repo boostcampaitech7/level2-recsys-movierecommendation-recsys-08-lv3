@@ -30,7 +30,7 @@ def main(args):
     model_name = args.model
     print(model_name)
     print(args.predict)
-    trainer_assigned = getattr(train_module, f'{model_name}Trainer')
+    trainer_class = getattr(train_module, f'{model_name}Trainer')
     
     # data_ side
     if not args.predict:
@@ -43,7 +43,7 @@ def main(args):
             data['train'] = sample_negative_items(data['train'], args.seed, args.negative)
             data=data_sidemerge(args,data)
 
-        trainer =trainer_assigned(args,data)
+        trainer =trainer_class(args,data)
         trained_model = trainer.train_model()
         print('---end---')
     else:
@@ -51,12 +51,12 @@ def main(args):
         if datatype=='context':
             data['total'] = sample_negative_items(data['total'], args.seed, args.negative_samples)
             data=data_sidemerge(args,data)
-            trainer= trainer_assigned(args,data)
+            trainer= trainer_class(args,data)
             trained_model = trainer.train_model()
             predict_base = trainer.generate_prediction_base()
             predictions = trainer.evaluate(trained_model, predict_base, top_k=10)
         else:
-            trainer= trainer_assigned(args,data)
+            trainer= trainer_class(args,data)
             trained_model= trainer.train()
             scores = trainer.predict()
             predictions = trainer.evaluate(scores.cpu().numpy())
