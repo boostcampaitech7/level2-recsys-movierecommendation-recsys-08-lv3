@@ -4,6 +4,9 @@ import torch.optim as optim
 from tqdm import tqdm
 
 class UnifiedDeepFM(nn.Module):
+    '''
+        모든 필드에대해 임베딩을 공유하는 deepFM 아키텍쳐입니다.
+    '''
     def __init__(self, input_dims, embedding_dim, mlp_dims, drop_rate=0.1):
         super(UnifiedDeepFM, self).__init__()
 
@@ -13,6 +16,7 @@ class UnifiedDeepFM(nn.Module):
         self.fc = nn.Embedding(total_input_dim, 1, padding_idx=sum(input_dims[:2]))  # For linear terms
         self.bias = nn.Parameter(torch.zeros((1,)))
         self.embedding_dim = embedding_dim * len(input_dims)  # User, item, genre, writer, director, year
+
         mlp_layers = []
         for i, dim in enumerate(mlp_dims):
             if i == 0:
