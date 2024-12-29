@@ -36,7 +36,7 @@ def context_data_split(args,data):
 def sample_negative_items(data, seed, num_negative):
     """
     Parameters:
-    - data (DataFrame): 전체 사용자-아이템 상호작용 데이터
+    - data (DataFrame): 전체 사용자-아이템 상호작용 데이터s
     - seed (int): 랜덤 시드 값 (재현성을 위해 사용)
     - num_negative (int): 생성할 부정 샘플의 수
 
