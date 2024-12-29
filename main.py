@@ -5,6 +5,8 @@ from omegaconf import OmegaConf
 import argparse
 from src.utils import *
 import ast
+import joblib
+
 
 def main(args):
 
@@ -46,7 +48,9 @@ def main(args):
             scores = trainer.predict()
             predictions = trainer.evaluate(scores.cpu().numpy())
             print(predictions)
-        ### model.pt 파일 추가하기 언제든지 관리가능하게!
+        os.makedirs(args.model_saved, exist_ok=True)
+        model_path = os.path.join(args.model_saved, model_name +'.joblib')     
+        joblib.dump(trained_model,model_path)
     else:
         # context data
         if datatype=='context':
