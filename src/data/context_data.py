@@ -213,7 +213,12 @@ def context_data_side_merge(args,data):
     return data
 
 
-class InteractionDataset(Dataset):
+class DeepFMDataset(Dataset):
+    '''
+        Side information 을 활용하는 데이터셋을 만듭니다
+        참고할사항은 DeepFm은 임베딩테이블을 공유하므로 사이드인포메이션의 총 유니크한 카테고리 값을
+        cumulative 하게 쌓아 임베딩 테이블 의 인덱스값에 상응되게합니다.
+    '''
     def __init__(self, dataframe, n_user, n_item, n_genre, n_writer, n_director, n_year):
         self.data = dataframe
         self.n_user = n_user
@@ -266,6 +271,10 @@ class InteractionDataset(Dataset):
         return user_tensor, item_tensor, genre, writer, director, year_tensor, interaction_tensor
 
 def collate_fn(batch, padding_idx):
+    '''
+        각 아이템에 multiple 장르,작가 및 감독을 표현애햐가때문에 배치당 길이가 다를수있습니다
+        그러한 이유때문에 매 배치마다 길이를 맞추며 패딩을 넣어주는 작업을 여기서 진행합니다.
+    '''
     # Unpack batch
     users, items, genres, writers, directors, years, interactions = zip(*batch)
 
