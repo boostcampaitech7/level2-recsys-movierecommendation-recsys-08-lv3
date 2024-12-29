@@ -180,64 +180,37 @@ def year2decade(x):
         return int(9)
     else:
         return -1  # Return -1 for years outside the range
+def merge_and_fillna(df,merge_cols):
+    '''
+        각 사이드 인포메이션을 df 에 합치고 결측값을 처리하는 함수입니다
+    '''
+    for column in merge_cols:
+        df=pd.merge(df,column,how='left',on='item')
+    df=df.fillna('unknown')
+
+    df['year'] = df['year'].apply(lambda row : int(row) if row!='unknown' else 'unknown')
+    df['director'] = df['director'].apply(lambda x: [] if isinstance(x, str) and x == 'unknown' else x)
+    df['writer'] = df['writer'].apply(lambda x: [] if isinstance(x, str) and x == 'unknown' else x)
+
+    return df
 
 def context_data_side_merge(args,data):
-
+    '''
+        훈련,추론에따라 데이터 통합을 구분지어주는 함수입니다.
+    '''
     genre_df = data['genre']
     writer_df = data['writer']
     director_df = data['director']
     year_df = data['year']
+    merge_cols=[genre_df,writer_df,director_df,year_df]
 
     if not args.predict:
-        data['train'] = pd.merge(data['train'],genre_df,how='left',on='item')
-        data['valid']= pd.merge(data['valid'],genre_df,how='left',on='item')
-
-        data['train'] = pd.merge(data['train'],writer_df,how='left',on='item')
-        data['valid']= pd.merge(data['valid'],writer_df,how='left',on='item')
-
-        data['train'] = pd.merge(data['train'], director_df,how='left',on='item')
-        data['valid']= pd.merge(data['valid'], director_df,how='left',on='item')
-
-        data['train'] = pd.merge(data['train'], year_df,how='left',on='item')
-        data['valid'] = pd.merge(data['valid'], year_df,how='left',on='item')
-        train_df,valid_df=data['train'],data['valid']
-
-        train_df=train_df.fillna('unknown')
-        train_df['year'] = train_df['year'].apply(lambda row: int(row) if row!='unknown' else 'unknown')
-        train_df['director'] = train_df['director'].apply(
-            lambda x: [] if isinstance(x, str) and x == 'unknown' else x
-        )
-        train_df['writer'] = train_df['writer'].apply(
-            lambda x: [] if isinstance(x, str) and x == 'unknown' else x
-        )
-        valid_df = valid_df.fillna('unknown')
-        valid_df['year'] = valid_df['year'].apply(
-            lambda row: int(row) if row != 'unknown' else 'unknown'
-        )
-        valid_df['director'] = valid_df['director'].apply(
-            lambda x: [] if isinstance(x, str) and x == 'unknown' else x
-        )
-        valid_df['writer'] = valid_df['writer'].apply(
-            lambda x: [] if isinstance(x, str) and x == 'unknown' else x
-        )
-        data['train'],data['valid']= train_df,valid_df
-        return data
+        data['train'] = merge_and_fillna(data['train'], merge_cols)
+        data['valid'] = merge_and_fillna(data['valid'], merge_cols)
     else:
-        data['total'] = pd.merge(data['total'],genre_df,how='left',on='item')
-        data['total'] = pd.merge(data['total'],writer_df,how='left',on='item')
-        data['total'] = pd.merge(data['total'], director_df,how='left',on='item')
-        data['total'] = pd.merge(data['total'], year_df,how='left',on='item')
-        train_df=data['total']
-        train_df=train_df.fillna('unknown')
-        train_df['year'] = train_df['year'].apply(lambda row: int(row) if row!='unknown' else 'unknown')
-        train_df['director'] = train_df['director'].apply(
-            lambda x: [] if isinstance(x, str) and x == 'unknown' else x
-        )
-        train_df['writer'] = train_df['writer'].apply(
-            lambda x: [] if isinstance(x, str) and x == 'unknown' else x
-        )
-        data['total']=train_df
-        return data
+        data['total'] = merge_and_fillna(data['total'], merge_cols)
+        
+    return data
 
 
 class InteractionDataset(Dataset):
