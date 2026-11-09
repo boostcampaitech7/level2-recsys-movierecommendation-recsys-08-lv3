@@ -5,6 +5,8 @@ from omegaconf import OmegaConf
 import argparse
 from src.utils import *
 import ast
+import joblib
+
 
 def main(args):
 
@@ -13,12 +15,9 @@ def main(args):
     
     datatype = args.model_args[args.model].datatype
 
-    if datatype == 'basic':
-        args.predict=True
-    # data load
-    else:
-        data_split_fn = getattr(data_module, f'{datatype}_data_split')  # e.g. basic_data_split()
+    
     data_load_fn = getattr(data_module, f'{datatype}_data_load')  # e.g. basic_data_load()
+    data_split_fn = getattr(data_module, f'{datatype}_data_split')  # e.g. basic_data_split()
     data = data_load_fn(args)
 
     if datatype == 'context':
@@ -39,13 +38,19 @@ def main(args):
         data= data_split_fn(args,data)
 
         if datatype=='context':
-            print('---sideinf merging---')
             data['train'] = sample_negative_items(data['train'], args.seed, args.negative)
             data=data_sidemerge(args,data)
-
-        trainer =trainer_class(args,data)
-        trained_model = trainer.train_model()
-        print('---end---')
+            trainer =trainer_class(args,data)
+            trained_model = trainer.train_model()
+        else:
+            trainer= trainer_class(args,data)
+            trained_model= trainer.train()
+            scores = trainer.predict()
+            predictions = trainer.evaluate(scores.cpu().numpy())
+            print(predictions)
+        os.makedirs(args.model_saved, exist_ok=True)
+        model_path = os.path.join(args.model_saved, model_name +'.joblib')     
+        joblib.dump(trained_model,model_path)
     else:
         # context data
         if datatype=='context':

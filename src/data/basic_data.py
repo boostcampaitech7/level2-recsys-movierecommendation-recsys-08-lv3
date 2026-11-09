@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 from scipy.sparse import csr_matrix
+from sklearn.model_selection import train_test_split
 
 def basic_data_load(args):
     '''
@@ -40,6 +41,50 @@ def basic_data_load(args):
     data['basic']= X_torch
 
     return data
+
+def basic_data_split(args,data):
+    """
+        train, valid 를 따로 총 데이터에서 나누는 역할을합니다.
+    """
+    # Temporary lists to store DataFrames
+    train_list = []
+    valid_list = []
+
+    # Split each user's data into train and valid
+    for user, group in data['total'].groupby('user'):
+        train, valid = train_test_split(group, test_size=args.split_size, random_state=args.seed)
+        train_list.append(train)
+        valid_list.append(valid)
+
+    # Concatenate all user-specific train and valid DataFrames
+    train_data = pd.concat(train_list, axis=0, ignore_index=True)
+    valid_data = pd.concat(valid_list, axis=0, ignore_index=True)
+    # Add train and valid splits to the data dictionary
+
+    data['train'] = train_data
+    data['valid'] = valid_data
+
+    # 유저 아이템 총 길이는 동일해야함
+    total_users = len(data['total']['user'].unique())
+    total_items = len(data['total']['item'].unique())
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    _, X_torch_train = create_matrices(train_data)
+    data['train'] = X_torch_train
+
+    _, X_torch_valid = create_matrices(valid_data)
+    data['valid'] = X_torch_valid
+
+    return data
+
+def create_matrices(df,total_users,total_items):
+    
+    users,items,interactions= df['user'].to_numpy(), df['item'].to_numpy(), df['interaction'].to_numpy()
+    csr_matrix =create_csr_matrix(users,items,interactions,total_users,total_items)
+    torch_matrix = create_torch_sparse_matrix(users, items, interactions, total_users, total_items, device=device)
+    return csr_matrix, torch_matrix
+
+
 
 def create_csr_matrix(users, items, values, num_users, num_items):
     '''

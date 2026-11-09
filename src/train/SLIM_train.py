@@ -3,6 +3,7 @@ from src.models import SLIMModel
 import torch
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error
 
 class SLIMTrainer:
     def __init__(self, args,data):
@@ -32,12 +33,15 @@ class SLIMTrainer:
         - X_sparse: PyTorch sparse matrix (users x items) on GPU
         """
         # Convert sparse matrix to dense
-        X_sparse=self.data['basic']
+        if self.args.predict:
+            X_sparse=self.data['basic']
+        else:
+            X_sparse=self.data['train']
         X = X_sparse.to_dense()  # [num_users, num_items]
 
         optimizer = torch.optim.SGD([self.model.W], lr=self.model.alpha)
 
-        for _ in tqdm(range(self.model.max_iter), desc="Training SLIM on GPU"):
+        for _ in tqdm(range(self.model.max_iter), desc="Training SLIM"):
             optimizer.zero_grad()
 
             # Predictions and loss computation
@@ -68,32 +72,48 @@ class SLIMTrainer:
         Returns:
         - Predicted scores (users x items) on GPU
         """
-        X_sparse=self.data['basic']
+        if self.args.predict:
+            X_sparse=self.data['basic']
+        else:
+            X_sparse=self.data['train']
         X = X_sparse.to_dense()  # Convert sparse matrix to dense
         with torch.no_grad():
             return torch.matmul(X, self.model.W)
         
     
     def evaluate(self,scores):
-        
-        X=self.data['basic']
-        n_users = X.shape[0]
-        result = []
+        if self.args.predict:
+            X=self.data['basic']
+            n_users = self.data['basic'].shape[0]
+            result = []
 
-        for user_idx in range(n_users):
-            # 이미 본 아이템 제거
-            user_row = X[user_idx].toarray().flatten()
-            seen_items = np.where(user_row > 0)[0]  # 시청한 item idx 찾기
+            for user_idx in range(n_users):
+                # 이미 본 아이템 제거
+                user_row = X[user_idx].toarray().flatten()
+                seen_items = np.where(user_row > 0)[0]  # 시청한 item idx 찾기
 
-            # 점수 마스킹
-            scores[user_idx, seen_items] = -np.inf
+                # 점수 마스킹
+                scores[user_idx, seen_items] = -np.inf
 
-            # 상위 10개 아이템 선택
-            top_items_idx = np.argsort(scores[user_idx])[-10:][::-1]
+                # 상위 10개 아이템 선택
+                top_items_idx = np.argsort(scores[user_idx])[-10:][::-1]
 
-            for item in top_items_idx:
-                result.append([user_idx, item])
+                for item in top_items_idx:
+                    result.append([user_idx, item])
 
-        recommendations_df = pd.DataFrame(result, columns=["user", "item"])
-        return recommendations_df
+            recommendations_df = pd.DataFrame(result, columns=["user", "item"])
+            return recommendations_df
+        else:
+
+            X_valid= self.data['valid']
+            X_valid_dense = X_valid.to_dense().numpy()
+            
+            scores_dense = scores
+            mask = X_valid_dense > 0
+            
+            y_true = X_valid_dense[mask]
+            y_pred = scores_dense[mask]
+            validation_loss = mean_squared_error(y_true, y_pred)
+            
+            return validation_loss
     
